@@ -1,0 +1,69 @@
+name: Change Request Workflow
+
+on:
+  pull_request:
+    types: [opened, labeled]
+
+jobs:
+  submit:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit
+        run: echo "CR Submitted"
+
+  review:
+    if: contains(github.event.label.name, 'review')
+    needs: submit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Review
+        run: echo "CR is under review"
+
+  analysis:
+    if: contains(github.event.label.name, 'analysis')
+    needs: review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analysis
+        run: echo "CR is being analyzed"
+
+  decline:
+    if: contains(github.event.label.name, 'decline')
+    needs: [review, analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decline
+        run: echo "CR has been declined"
+
+  commit:
+    if: contains(github.event.label.name, 'commit')
+    needs: analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Commit
+        run: echo "Changes committed for CR"
+
+  implement:
+    if: contains(github.event.label.name, 'implement')
+    needs: commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Implement
+        run: echo "Implementation in progress"
+
+  verification:
+    if: contains(github.event.label.name, 'verification')
+    needs: implement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verification
+        run: echo "CR is under verification"
+
+  closed:
+    if: contains(github.event.label.name, 'closed')
+    needs: [verification, decline]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Closed
+        run: echo "CR is closed"
